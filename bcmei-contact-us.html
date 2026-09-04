@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Contact Us | BCM Engineering India</title>
+
+  <!-- Modern Industrial Tech Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Three.js for 3D Background Visuals -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    :root {
+      --bg-black: #050507;
+      --card-bg: rgba(20, 20, 26, 0.7);
+      --border-color: rgba(255, 255, 255, 0.15);
+      --accent-glow: #ffffff;
+      --text-muted: #a0a0b0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-black);
+      color: #ffffff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+
+    /* 3D Canvas Background */
+    #webgl-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .ui-layer {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Header Navigation */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 6%;
+      background: rgba(5, 5, 7, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      width: 100%;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      z-index: 1002;
+    }
+
+    .brand-logo img {
+      height: 48px;
+      width: auto;
+      aspect-ratio: 300 / 189;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+      transition: filter 0.3s ease;
+    }
+
+    .brand-logo img:hover {
+      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 1)) drop-shadow(0 0 30px rgba(255, 255, 255, 0.8));
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+
+    nav a:hover, nav a.active {
+      color: #ffffff;
+      text-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .btn-header {
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease !important;
+    }
+
+    .btn-header:hover {
+      background: #ffffff !important;
+      color: #000000 !important;
+      text-shadow: none !important;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 30px;
+      height: 24px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 1002;
+    }
+
+    .hamburger span {
+      width: 100%;
+      height: 3px;
+      background: #ffffff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 8px rgba(255,255,255,0.5);
+    }
+
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Page Header / Hero */
+    .page-hero {
+      min-height: 34vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 5rem 8% 3rem;
+      max-width: 1200px;
+    }
+
+    .badge {
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      padding: 0.4rem 1.2rem;
+      border-radius: 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .page-hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 900;
+      line-height: 1.08;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 20px rgba(255,255,255,0.15);
+    }
+
+    .page-hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin-bottom: 2.2rem;
+      line-height: 1.5;
+    }
+
+    .cta-container {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 1.1rem 2.5rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .btn-solid {
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid #ffffff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-solid:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 35px rgba(255, 255, 255, 0.6);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #ffffff;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-outline:hover {
+      border-color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-3px);
+    }
+
+    /* Content Sections */
+    .content-section {
+      padding: 4rem 8%;
+    }
+
+    .content-section.tight {
+      padding-top: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.6rem;
+    }
+
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 640px;
+      margin-bottom: 3rem;
+      line-height: 1.5;
+    }
+
+    /* Contact Grid (reuses the product-card glass treatment) */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+
+    @media (max-width: 1100px) {
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      .product-grid { grid-template-columns: 1fr; }
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 2.4rem 2rem;
+      border-radius: 8px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: relative;
+      transition: all 0.4s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      border-color: #ffffff;
+      box-shadow: 0 10px 30px rgba(255,255,255,0.15);
+    }
+
+    .product-card .icon {
+      width: 44px;
+      height: 44px;
+      color: #ffffff;
+      margin-bottom: 1.4rem;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.35));
+    }
+
+    .product-card .icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .product-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.05rem;
+      margin-bottom: 0.9rem;
+      color: #ffffff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .product-card p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 0.3rem;
+    }
+
+    .product-card a.card-link {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-decoration: none;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 3px;
+      transition: all 0.3s ease;
+      display: inline-block;
+      margin-top: 1rem;
+    }
+
+    .product-card a.card-link:hover {
+      text-shadow: 0 0 12px var(--accent-glow);
+      border-color: #ffffff;
+    }
+
+    .product-card .gstin {
+      margin-top: 1.4rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border-color);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .product-card .gstin span {
+      color: #ffffff;
+    }
+
+    .product-card.map-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .product-card.map-card .btn {
+      margin-top: 0.6rem;
+      padding: 0.9rem 2rem;
+    }
+
+    .product-card.cta-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .cta-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      width: 100%;
+      margin-top: 0.6rem;
+    }
+
+    .cta-stack a {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: #ffffff;
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.03);
+      transition: all 0.3s ease;
+    }
+
+    .cta-stack a svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .cta-stack a:hover {
+      border-color: #ffffff;
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 0 15px rgba(255,255,255,0.15);
+    }
+
+    /* Certified banner (reused for map CTA) */
+    .banner {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 2.6rem 2.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .banner .tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.7rem;
+    }
+
+    .banner h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      max-width: 30ch;
+      text-shadow: 0 0 16px rgba(255,255,255,0.2);
+    }
+
+    .banner p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 0.6rem;
+      max-width: 44ch;
+      line-height: 1.5;
+    }
+
+    /* Social strip */
+    .socials {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border-color);
+      padding-top: 3rem;
+    }
+
+    .socials h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .socials p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .social-links a {
+      width: 52px;
+      height: 52px;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      text-decoration: none;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .social-links a svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .social-links a:hover {
+      border-color: #ffffff;
+      background: #ffffff;
+      color: #000000;
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(255,255,255,0.4);
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2.5rem 5%;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1px;
+      background: rgba(5, 5, 7, 0.95);
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.3s, border-color 0.3s;
+    }
+
+    footer a:hover {
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+
+    @media (min-width: 769px) {
+      .brand-logo img { height: 52px; }
+    }
+
+    @media (max-width: 768px) {
+      .hamburger { display: flex; }
+
+      nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80vw;
+        max-width: 300px;
+        height: 100vh;
+        background: rgba(10, 10, 14, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 2.5rem;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        border-left: 1px solid var(--border-color);
+        z-index: 1001;
+      }
+
+      nav.active { right: 0; }
+      nav a { font-size: 1.1rem; }
+
+      .page-hero { padding: 3.5rem 6% 2rem; }
+      .page-hero h1 { font-size: 2.2rem; }
+      .content-section { padding: 3rem 6%; }
+      .btn { width: 100%; text-align: center; }
+      .banner { flex-direction: column; align-items: flex-start; }
+      .socials { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D Graphic Canvas Background -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <div class="ui-layer">
+    <header>
+      <a href="https://bcmengind.in" class="brand-logo" aria-label="BCM Engineering India Home">
+        <img
+          src="https://hindustanenterprise.net/wp-content/uploads/2026/08/BCM-Logo-BLACK-2-300x189-removebg-preview.png"
+          alt="BCM® Trademark Logo"
+        />
+      </a>
+
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav id="navMenu">
+        <a href="https://bcmengind.in">Home</a>
+        <a href="https://products.bcmengind.in">Products</a>
+        <a href="https://contactus.bcmengind.in" class="active">Contact Us</a>
+        <a id="priceListBtn" class="btn-header" href="https://pricelist.bcmengind.in">Price List</a>
+      </nav>
+    </header>
+    <section class="content-section tight">
+    </section>
+
+    <section class="content-section tight">
+      <h2 class="section-title">Get In Touch</h2>
+<p class="section-sub">So we can provide you with exactly what you’re looking for !!!</p>
+    </section>
+
+    <section class="content-section tight">
+      <div class="product-grid">
+
+        <div class="product-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M24 6c-8 0-14 6-14 14 0 10 14 22 14 22s14-12 14-22c0-8-6-14-14-14Z"/><circle cx="24" cy="20" r="5"/></svg></div>
+          <h3>City Office</h3>
+          <p>Room No. 309, 3rd Floor, Century Plaza,<br>81, Netaji Subash Road, Kolkata &ndash; 700010</p>
+        </div>
+
+        <div class="product-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 40V18l10-6v28"/><path d="M16 40V12l14-6v34"/><path d="M30 40V20l12 6v14"/><line x1="4" y1="40" x2="44" y2="40"/></svg></div>
+          <h3>Factory</h3>
+          <p>Tentulkuli Industrial Estate,<br>Village &amp; PO: Tentulkuli, PS: Domjur,<br>Howrah &ndash; 711 409</p>
+        </div>
+
+        <div class="product-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="8" width="36" height="32" rx="2"/><line x1="6" y1="18" x2="42" y2="18"/><line x1="13" y1="26" x2="21" y2="26"/><line x1="13" y1="32" x2="27" y2="32"/></svg></div>
+          <h3>GSTIN</h3>
+          <p>19CSKPM1909G1ZJ</p>
+        </div>
+
+        <div class="product-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="10" width="36" height="28" rx="2"/><path d="M6 12l18 15 18-15"/></svg></div>
+          <h3>Email</h3>
+          <p>For quotations, catalogues, and general enquiries, email us at bcmengineeringindia@gmail.com</p>
+        </div>
+
+        <div class="product-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6h6l3 9-5 3c2 6 6 10 12 12l3-5 9 3v6c0 2-2 4-4 4-16-1-28-13-29-29 0-2 2-4 4-4Z"/></svg></div>
+          <h3>Phone</h3>
+          <p>(033) 4024 5170<br>(+91) 62892 32792<br>(+91) 82405 58492</p>
+        </div>
+
+        <div class="product-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="17"/><path d="M24 14v10l7 5"/></svg></div>
+          <h3>Working Hours</h3>
+          <p>Mon &ndash; Fri: 9:00 AM &ndash; 7:30 PM<br>Sat: 9:00 AM &ndash; 7:00 PM<br>Sun: Closed</p>
+        </div>
+
+        <div class="product-card map-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 10v32l12-4 12 4 12-4V6l-12 4-12-4Z"/><line x1="18" y1="6" x2="18" y2="38"/><line x1="30" y1="10" x2="30" y2="42"/></svg></div>
+          <h3>Find Us on Google Maps</h3>
+          <p>Come visit us, right in the heart of Kolkata - the City of Joy</p>
+          <p><a href="https://goo.gl/maps/tFAdQNva2ppf7V3e8" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Locate Us</a><p>
+        </div>
+
+        <div class="product-card cta-card">
+          <div class="icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V12Z"/><path d="M6 13l18 13 18-13"/></svg></div>
+          <h3>Get In Touch</h3>
+          <div class="cta-stack">
+            <a href="mailto:bcmengineeringindia@gmail.com">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 6l9 7 9-7"/></svg>
+              Email Us
+            </a>
+            <a href="tel:+916289232792">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h3l2 5-2.5 1.5c1 3 3 5 6 6L15 14l5 2v3c0 1-1 2-2 2-8-.5-14-6.5-14.5-14.5C3.5 5 4.5 4 5 4Z"/></svg>
+              Call Us
+            </a>
+            <a href="https://wa.me/+916289232792" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.38a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.03c-.24.68-1.4 1.32-1.93 1.4-.5.08-1.12.11-1.8-.11-.42-.13-.95-.31-1.64-.6-2.88-1.24-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.97 0-1.41.74-2.1 1-2.39.26-.29.57-.36.76-.36h.55c.18 0 .42-.03.65.5.24.55.81 1.9.88 2.04.07.14.12.31.02.5-.09.19-.14.31-.28.48-.14.17-.29.38-.42.51-.14.14-.28.29-.12.57.16.28.71 1.18 1.53 1.91 1.05.94 1.94 1.24 2.22 1.38.28.14.44.12.6-.07.16-.19.68-.79.86-1.06.19-.28.37-.23.62-.14.26.09 1.63.77 1.91.91.28.14.47.21.53.33.07.13.07.72-.17 1.4z"/></svg>
+              WhatsApp
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="content-section" style="padding-top:0;">
+      <div class="socials">
+        <div>
+          <h3>Follow Us</h3>
+          <p>Updates on new products, catalogues, and price lists</p>
+        </div>
+        <div class="social-links">
+          <a href="https://wa.me/+916289232792" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.38a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.03c-.24.68-1.4 1.32-1.93 1.4-.5.08-1.12.11-1.8-.11-.42-.13-.95-.31-1.64-.6-2.88-1.24-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.97 0-1.41.74-2.1 1-2.39.26-.29.57-.36.76-.36h.55c.18 0 .42-.03.65.5.24.55.81 1.9.88 2.04.07.14.12.31.02.5-.09.19-.14.31-.28.48-.14.17-.29.38-.42.51-.14.14-.28.29-.12.57.16.28.71 1.18 1.53 1.91 1.05.94 1.94 1.24 2.22 1.38.28.14.44.12.6-.07.16-.19.68-.79.86-1.06.19-.28.37-.23.62-.14.26.09 1.63.77 1.91.91.28.14.47.21.53.33.07.13.07.72-.17 1.4z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/bcmengind/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1"/></svg>
+          </a>
+          <a href="https://twitter.com/bcmengind" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.3 2H21l-6.5 7.4L22 22h-6.6l-5.2-6.8L4.2 22H1.5l7-8-7.2-12H8l4.7 6.2L18.3 2Zm-1.1 18h1.5L7 4H5.4l11.8 16Z"/></svg>
+          </a>
+          <a href="https://hindustanenterprise.net/home/bcmengineeringindia/" aria-label="Home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 Hindustan Enterprise &middot; <a href="https://hindustanenterprise.net/home/hindustanenterpriseprivacypolicy/">Privacy Policy</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Mobile Hamburger Menu Toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const navMenu = document.getElementById('navMenu');
+
+    if (hamburgerBtn && navMenu) {
+      hamburgerBtn.addEventListener('click', () => {
+        hamburgerBtn.classList.toggle('active');
+        navMenu.classList.toggle('active');
+      });
+
+      navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          hamburgerBtn.classList.remove('active');
+          navMenu.classList.remove('active');
+        });
+      });
+    }
+
+    // Dynamic Price List URL fetch from localStorage
+    function initDynamicLinks() {
+      const storedPriceUrl = localStorage.getItem('bcm_price_list_url');
+      if (storedPriceUrl) {
+        const priceBtn = document.getElementById('priceListBtn');
+        if (priceBtn) priceBtn.href = storedPriceUrl;
+      }
+    }
+    initDynamicLinks();
+
+    // Three.js 3D Interactive Graphics Setup
+    let scene, camera, renderer, coreMesh, wireframeMesh, sparkParticles;
+    let targetRotationX = 0, targetRotationY = 0;
+    let mouseX = 0, mouseY = 0;
+
+    function init3D() {
+      const canvas = document.getElementById('webgl-canvas');
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 6;
+
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const geometry = new THREE.IcosahedronGeometry(2, 2);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x22222a,
+        metalness: 0.55,
+        roughness: 0.6
+      });
+      coreMesh = new THREE.Mesh(geometry, material);
+      scene.add(coreMesh);
+
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.15
+      });
+      wireframeMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(2.3, 2), wireMat);
+      scene.add(wireframeMesh);
+
+      const particleCount = 120;
+      const particleGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 8;
+        positions[i+1] = (Math.random() - 0.5) * 8;
+        positions[i+2] = (Math.random() - 0.5) * 8;
+      }
+
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      const particleMat = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.035,
+        sizeAttenuation: true,
+        transparent: true,
+        opacity: 0.5
+      });
+
+      sparkParticles = new THREE.Points(particleGeo, particleMat);
+      scene.add(sparkParticles);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+      scene.add(ambientLight);
+
+      const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      mainLight.position.set(5, 5, 5);
+      scene.add(mainLight);
+
+      const blueRimLight = new THREE.PointLight(0xffffff, 0.5, 10);
+      blueRimLight.position.set(-5, -2, -2);
+      scene.add(blueRimLight);
+
+      window.addEventListener('resize', onWindowResize);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('touchmove', onTouchMove, { passive: true });
+      window.addEventListener('scroll', onScroll);
+
+      animate();
+    }
+
+    function onMouseMove(e) {
+      mouseX = (e.clientX / window.innerWidth) - 0.5;
+      mouseY = (e.clientY / window.innerHeight) - 0.5;
+    }
+
+    function onTouchMove(e) {
+      if (e.touches.length > 0) {
+        mouseX = (e.touches[0].clientX / window.innerWidth) - 0.5;
+        mouseY = (e.touches[0].clientY / window.innerHeight) - 0.5;
+      }
+    }
+
+    function onScroll() {
+      const scrollY = window.scrollY;
+      coreMesh.rotation.z = scrollY * 0.001;
+      wireframeMesh.rotation.z = -scrollY * 0.0015;
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      targetRotationY += (mouseX * 2 - targetRotationY) * 0.05;
+      targetRotationX += (mouseY * 2 - targetRotationX) * 0.05;
+
+      coreMesh.rotation.y += 0.005;
+      coreMesh.rotation.x = targetRotationX;
+      coreMesh.rotation.y += targetRotationY * 0.1;
+
+      wireframeMesh.rotation.y -= 0.003;
+      wireframeMesh.rotation.x = -targetRotationX;
+
+      sparkParticles.rotation.y += 0.002;
+
+      renderer.render(scene, camera);
+    }
+
+    window.onload = init3D;
+  </script>
+</body>
+</html>
